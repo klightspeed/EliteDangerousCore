@@ -490,5 +490,48 @@ namespace EliteDangerousCore
 
             return sn;
         }
+
+        public void FindSystemAsync(ISystem sys, bool edsmweblookup, Action<SystemNode> callback)
+        {
+            SystemNode sn = FindSystemNode(sys);
+
+            // System.Diagnostics.Debug.WriteLine("Scan Lookup " + sys.Name + " found " + (sn != null) + " web? " + edsmweblookup + " edsm lookup " + (sn?.EDSMAdded ?? false));
+
+            if ((sys.EDSMID > 0 || (sys.SystemAddress != null && sys.SystemAddress > 0) || (sys.Name.HasChars())) && (sn == null || sn.EDSMCacheCheck == false || (edsmweblookup && !sn.EDSMWebChecked)))
+            {
+                System.Threading.Tasks.Task.Factory.StartNew(() =>
+                {
+                    var jl = EliteDangerousCore.EDSM.EDSMClass.GetBodiesList(sys, edsmweblookup); // lookup, with optional web
+
+                    //if (edsmweblookup) System.Diagnostics.Debug.WriteLine("EDSM WEB Lookup bodies " + sys.Name + " " + sys.EDSMID + " result " + (jl?.Count ?? -1));
+
+                    if (jl != null && jl.Item2 == false) // found some bodies, not from the cache
+                    {
+                        foreach (JournalScan js in jl.Item1)
+                        {
+                            js.BodyDesignation = GetBodyDesignation(js, sys.Name);
+                            ProcessJournalScan(js, sys, true);
+                        }
+                    }
+
+                    if (sn == null) // refind to make sure SN is set
+                        sn = FindSystemNode(sys);
+
+                    if (sn != null) // if we found it, set to indicate we did a cache check
+                    {
+                        sn.EDSMCacheCheck = true;
+
+                        if (edsmweblookup)      // and if we did a web check, set it too..
+                            sn.EDSMWebChecked = true;
+                    }
+
+                    callback?.Invoke(sn);
+                });
+            }
+            else
+            {
+                callback?.Invoke(sn);
+            }
+        }
     }
 }
