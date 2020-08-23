@@ -30,11 +30,11 @@ namespace EliteDangerousCore
 
     public abstract partial class JournalEntry
     {
-        static protected JournalEntry CreateJournalEntry(DbDataReader dr)
+        static protected JournalEntry CreateJournalEntry(DbDataReader dr, bool savejson = false)
         {
             string EDataString = (string)dr["EventData"];
 
-            JournalEntry jr = JournalEntry.CreateJournalEntry(EDataString);
+            JournalEntry jr = JournalEntry.CreateJournalEntry(EDataString, savejson);
 
             jr.Id = (int)(long)dr["Id"];
             jr.TLUId = (int)(long)dr["TravelLogId"];
@@ -480,7 +480,7 @@ namespace EliteDangerousCore
             }
         }
                
-        internal static List<JournalEntry> GetAllByTLU(long tluid, SQLiteConnectionUser cn)
+        internal static List<JournalEntry> GetAllByTLU(long tluid, SQLiteConnectionUser cn, bool savejson = false)
         {
             TravelLogUnit tlu = TravelLogUnit.Get(tluid);
             List<JournalEntry> vsc = new List<JournalEntry>();
@@ -492,7 +492,7 @@ namespace EliteDangerousCore
                 {
                     while (reader.Read())
                     {
-                        JournalEntry je = CreateJournalEntry(reader);
+                        JournalEntry je = CreateJournalEntry(reader, savejson);
                         je.beta = tlu?.Beta ?? false;
                         vsc.Add(je);
                     }

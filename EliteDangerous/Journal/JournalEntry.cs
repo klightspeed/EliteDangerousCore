@@ -213,7 +213,7 @@ namespace EliteDangerousCore
             return CreateJournalEntry(jo.ToString());
         }
 
-        static public JournalEntry CreateJournalEntry(string text)
+        static public JournalEntry CreateJournalEntry(string text, bool savejson = false)
         {
             JObject jo;
 
@@ -227,7 +227,7 @@ namespace EliteDangerousCore
                 return new JournalUnknown(new JObject());
             }
 
-            return CreateJournalEntry(jo);
+            return CreateJournalEntry(jo, savejson);
         }
 
         static public JournalEntry CreateJournalEntry(JObject jo, bool savejson = false)

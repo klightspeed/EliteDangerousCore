@@ -314,7 +314,7 @@ namespace EliteDangerousCore
                         }
                         else
                         {
-                            ILookup<DateTime, JournalEntry> existing = JournalEntry.GetAllByTLU(reader.TravelLogUnit.id, cn.Connection).ToLookup(e => e.EventTimeUTC);
+                            ILookup<DateTime, JournalEntry> existing = JournalEntry.GetAllByTLU(reader.TravelLogUnit.id, cn.Connection, true).ToLookup(e => e.EventTimeUTC);
 
                             //System.Diagnostics.Trace.WriteLine(BaseUtils.AppTicks.TickCountLap("PJF"), i + " into db");
 
@@ -322,7 +322,7 @@ namespace EliteDangerousCore
                             {
                                 foreach (JournalEntry jre in entries)
                                 {
-                                    if (!existing[jre.EventTimeUTC].Any(e => JournalEntry.AreSameEntry(jre, e, cn.Connection, ent1jo: jre.GetJson())))
+                                    if (!existing[jre.EventTimeUTC].Any(e => JournalEntry.AreSameEntry(jre, e, cn.Connection, ent1jo: jre.GetJson(), ent2jo: e.GetJson())))
                                     {
                                         jre.Add(jre.GetJson(), cn.Connection, tn);
 
