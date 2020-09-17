@@ -428,7 +428,7 @@ namespace EliteDangerousCore.EDSM
                 }
 
                 RemoveCommonKeys(json);
-                if (je.EventTypeID == JournalTypeEnum.FSDJump && json["FuelUsed"].IsNull())
+                if (je is JournalFSDJump && json["FuelUsed"].IsNull())
                     json["_convertedNetlog"] = true;
                 if (json["StarPosFromEDSM"].Bool(false)) // Remove star pos from EDSM
                     json.Remove("StarPos");

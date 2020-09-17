@@ -111,9 +111,9 @@ namespace EliteDangerousCore.JournalEvents
 
     // Base class used for craft and legacy
 
-    public class JournalEngineerCraftBase : JournalEntry, IMaterialJournalEntry, IShipInformation
+    public abstract class JournalEngineerCraftBase : JournalEntry, IMaterialJournalEntry, IShipInformation
     {
-        public JournalEngineerCraftBase(JObject evt, JournalTypeEnum en) : base(evt, en)
+        protected JournalEngineerCraftBase(JObject evt, JournalTypeEnum en) : base(evt, en)
         {
             SlotFD = JournalFieldNaming.NormaliseFDSlotName(evt["Slot"].Str());
             Slot = JournalFieldNaming.GetBetterSlotName(SlotFD);

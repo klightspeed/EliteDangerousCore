@@ -172,39 +172,39 @@ namespace EliteDangerousCore.EDDN
 
             BaseUtils.JSON.JObject msg = null;
 
-            if (je.EventTypeID == JournalTypeEnum.FSDJump)
+            if (je is JournalFSDJump)
             {
                 msg = eddn.CreateEDDNMessage(je as JournalFSDJump);
             }
-            else if (je.EventTypeID == JournalTypeEnum.Location)
+            else if (je is JournalLocation)
             {
                 msg = eddn.CreateEDDNMessage(je as JournalLocation);
             }
-            else if (je.EventTypeID == JournalTypeEnum.CarrierJump)
+            else if (je is JournalCarrierJump)
             {
                 msg = eddn.CreateEDDNMessage(je as JournalCarrierJump);
             }
-            else if (je.EventTypeID == JournalTypeEnum.Docked)
+            else if (je is JournalDocked)
             {
                 msg = eddn.CreateEDDNMessage(je as JournalDocked, he.System);
             }
-            else if (je.EventTypeID == JournalTypeEnum.Scan)
+            else if (je is JournalScan)
             {
                 msg = eddn.CreateEDDNMessage(je as JournalScan, he.System);
             }
-            else if (je.EventTypeID == JournalTypeEnum.SAASignalsFound)
+            else if (je is JournalSAASignalsFound)
             {
                 msg = eddn.CreateEDDNMessage(je as JournalSAASignalsFound, he.System);
             }
-            else if (je.EventTypeID == JournalTypeEnum.Outfitting)
+            else if (je is JournalOutfitting)
             {
                 msg = eddn.CreateEDDNOutfittingMessage(je as JournalOutfitting);
             }
-            else if (je.EventTypeID == JournalTypeEnum.Shipyard)
+            else if (je is JournalShipyard)
             {
                 msg = eddn.CreateEDDNShipyardMessage(je as JournalShipyard);
             }
-            else if (je.EventTypeID == JournalTypeEnum.Market)
+            else if (je is JournalMarket)
             {
                 JournalMarket jm = je as JournalMarket;
                 msg = eddn.CreateEDDNCommodityMessage(jm.Commodities, jm.StarSystem, jm.Station, jm.MarketID, jm.EventTimeUTC);      // if its devoid of data, null returned

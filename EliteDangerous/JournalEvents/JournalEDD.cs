@@ -44,9 +44,9 @@ namespace EliteDangerousCore.JournalEvents
         }
     }
 
-    public class JournalCommodityPricesBase : JournalEntry
+    public abstract class JournalCommodityPricesBase : JournalEntry
     {
-        public JournalCommodityPricesBase(JObject evt, JournalTypeEnum en) : base(evt,en)
+        protected JournalCommodityPricesBase(JObject evt, JournalTypeEnum en) : base(evt,en)
         {
         }
 

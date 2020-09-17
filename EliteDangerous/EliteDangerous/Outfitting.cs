@@ -151,7 +151,7 @@ namespace EliteDangerousCore
 
         public void Process(JournalEntry je)
         {
-            if (je.EventTypeID == JournalTypeEnum.Outfitting)
+            if (je is JournalEvents.JournalOutfitting)
             {
                 JournalEvents.JournalOutfitting js = je as JournalEvents.JournalOutfitting;
                 if (js.ItemList.Items != null)     // just in case we get a bad Outfitting with no data or its one which was not caught by the EDD at the time

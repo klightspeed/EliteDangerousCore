@@ -405,8 +405,8 @@ namespace EliteDangerousCore
         public List<JournalScan> GetScans(string name)
         {
             return (from s in historylist.AsParallel()
-                    where (s.journalEntry.EventTypeID == JournalTypeEnum.Scan && s.System.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                    select s.journalEntry as JournalScan).ToList<JournalScan>();
+                    where (s.journalEntry is JournalScan && s.System.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    select s.journalEntry as JournalScan).ToList();
         }
 
         public int GetFSDCarrierJumps(TimeSpan t)
@@ -434,7 +434,7 @@ namespace EliteDangerousCore
         public Tuple<int, long> GetScanCountAndValueUTC(DateTime startutc, DateTime toutc)
         {
             var scans = historylist
-                .Where(s => s.EntryType == JournalTypeEnum.Scan && s.EventTimeUTC >= startutc && s.EventTimeUTC < toutc)
+                .Where(s => s.journalEntry is JournalScan && s.EventTimeUTC >= startutc && s.EventTimeUTC < toutc)
                 .Select(h => h.journalEntry as JournalScan)
                 .Distinct(new ScansAreForSameBody()).ToArray();
 
@@ -452,7 +452,7 @@ namespace EliteDangerousCore
         public HistoryFsdJumpStatistics GetFsdJumpStatistics(DateTime startUtc, DateTime toUtc)
         {
             var jumps = historylist
-                .Where(s => s.EntryType == JournalTypeEnum.FSDJump && s.EventTimeUTC >= startUtc && s.EventTimeUTC < toUtc)
+                .Where(s => s.journalEntry is JournalFSDJump && s.EventTimeUTC >= startUtc && s.EventTimeUTC < toUtc)
                 .Select(h => h.journalEntry as JournalFSDJump)
                 .ToArray();
 
@@ -482,27 +482,27 @@ namespace EliteDangerousCore
 
         public double GetTraveledLy(string forShipKey)
         {
-            var list = (from s in historylist where s.EntryType == JournalTypeEnum.FSDJump && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalFSDJump).ToList<JournalFSDJump>();
+            var list = (from s in historylist where s.journalEntry is JournalFSDJump && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalFSDJump).ToList<JournalFSDJump>();
 
             return (from s in list select s.JumpDist).Sum();
         }
 
         public List<JournalScan> GetScanListUTC(DateTime startutc, DateTime toutc)
         {
-            return (from s in historylist where s.EntryType == JournalTypeEnum.Scan && s.EventTimeUTC >= startutc && s.EventTimeUTC < toutc select s.journalEntry as JournalScan)
+            return (from s in historylist where s.journalEntry is JournalScan && s.EventTimeUTC >= startutc && s.EventTimeUTC < toutc select s.journalEntry as JournalScan)
                 .Distinct(new ScansAreForSameBody()).ToList();
         }
 
         public int GetTonnesBought(string forShipKey)
         {
-            var list = (from s in historylist where s.EntryType == JournalTypeEnum.MarketBuy && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalMarketBuy).ToList();
+            var list = (from s in historylist where s.journalEntry is JournalMarketBuy && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalMarketBuy).ToList();
 
             return (from s in list select s.Count).Sum();
         }
 
         public int GetTonnesSold(string forShipKey)
         {
-            var list = (from s in historylist where s.EntryType == JournalTypeEnum.MarketSell && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalMarketSell).ToList();
+            var list = (from s in historylist where s.journalEntry is JournalMarketSell && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalMarketSell).ToList();
 
             return (from s in list select s.Count).Sum();
         }
@@ -514,7 +514,7 @@ namespace EliteDangerousCore
 
         public int GetBodiesScanned(string forShipKey)
         {
-            return (from s in historylist where s.EntryType == JournalTypeEnum.Scan && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalScan)
+            return (from s in historylist where s.journalEntry is JournalScan && $"{s.ShipTypeFD.ToLowerInvariant()}:{s.ShipId}" == forShipKey select s.journalEntry as JournalScan)
                 .Distinct(new ScansAreForSameBody()).Count();
         }
 
@@ -525,7 +525,7 @@ namespace EliteDangerousCore
 
         public string GetCommanderFID()     // may be null
         {
-            var cmdr = historylist.FindLast(x => x.EntryType == JournalTypeEnum.Commander);
+            var cmdr = historylist.FindLast(x => x.journalEntry is JournalCommander);
             return (cmdr?.journalEntry as JournalCommander)?.FID;
         }
 
@@ -1162,22 +1162,22 @@ namespace EliteDangerousCore
 
                 he.UpdateMissionList(missionlistaccumulator.Process(je, he.System, he.WhereAmI));
 
-                if (je.EventTypeID == JournalTypeEnum.Scan && je is JournalScan)
+                if (je is JournalScan)
                 {
                     if (!this.starscan.AddScanToBestSystem(je as JournalScan, i, hl))
                     {
                         System.Diagnostics.Debug.WriteLine("******** Cannot add scan to system " + (je as JournalScan).BodyName + " in " + he.System.Name);
                     }
                 }
-                else if (je.EventTypeID == JournalTypeEnum.SAAScanComplete)
+                else if (je is JournalSAAScanComplete)
                 {
                     this.starscan.AddSAAScanToBestSystem((JournalSAAScanComplete)je, i, hl);
                 }
-                else if (je.EventTypeID == JournalTypeEnum.SAASignalsFound)
+                else if (je is JournalSAASignalsFound)
                 {
                     this.starscan.AddSAASignalsFoundToBestSystem((JournalSAASignalsFound)je, i, hl);
                 }
-                else if (je.EventTypeID == JournalTypeEnum.FSSDiscoveryScan && he.System != null)
+                else if (je is JournalFSSDiscoveryScan && he.System != null)
                 {
                     this.starscan.SetFSSDiscoveryScan((JournalFSSDiscoveryScan)je, he.System);
                 }
@@ -1211,7 +1211,7 @@ namespace EliteDangerousCore
 
                 if (prevsame)
                 {
-                    if (je.EventTypeID == JournalTypeEnum.FuelScoop)  // merge scoops
+                    if (je is JournalFuelScoop && prev is JournalFuelScoop)  // merge scoops
                     {
                         EliteDangerousCore.JournalEvents.JournalFuelScoop jfs = je as EliteDangerousCore.JournalEvents.JournalFuelScoop;
                         EliteDangerousCore.JournalEvents.JournalFuelScoop jfsprev = prev as EliteDangerousCore.JournalEvents.JournalFuelScoop;
@@ -1220,7 +1220,7 @@ namespace EliteDangerousCore
                         //System.Diagnostics.Debug.WriteLine("Merge FS " + jfsprev.EventTimeUTC);
                         return true;
                     }
-                    else if (je.EventTypeID == JournalTypeEnum.Friends) // merge friends
+                    else if (je is JournalFriends && prev is JournalFriends) // merge friends
                     {
                         EliteDangerousCore.JournalEvents.JournalFriends jfprev = prev as EliteDangerousCore.JournalEvents.JournalFriends;
                         EliteDangerousCore.JournalEvents.JournalFriends jf = je as EliteDangerousCore.JournalEvents.JournalFriends;
@@ -1228,28 +1228,28 @@ namespace EliteDangerousCore
                         //System.Diagnostics.Debug.WriteLine("Merge Friends " + jfprev.EventTimeUTC + " " + jfprev.NameList.Count);
                         return true;
                     }
-                    else if (je.EventTypeID == JournalTypeEnum.FSSSignalDiscovered)
+                    else if (je is JournalFSSSignalDiscovered && prev is JournalFSSSignalDiscovered)
                     {
                         var jdprev = prev as EliteDangerousCore.JournalEvents.JournalFSSSignalDiscovered;
                         var jd = je as EliteDangerousCore.JournalEvents.JournalFSSSignalDiscovered;
                         jdprev.Add(jd);
                         return true;
                     }
-                    else if (je.EventTypeID == JournalTypeEnum.ShipTargeted)
+                    else if (je is JournalShipTargeted && prev is JournalShipTargeted)
                     {
                         var jdprev = prev as EliteDangerousCore.JournalEvents.JournalShipTargeted;
                         var jd = je as EliteDangerousCore.JournalEvents.JournalShipTargeted;
                         jdprev.Add(jd);
                         return true;
                     }
-                    else if (je.EventTypeID == JournalTypeEnum.UnderAttack)
+                    else if (je is JournalUnderAttack && prev is JournalUnderAttack)
                     {
                         var jdprev = prev as EliteDangerousCore.JournalEvents.JournalUnderAttack;
                         var jd = je as EliteDangerousCore.JournalEvents.JournalUnderAttack;
                         jdprev.Add(jd.Target);
                         return true;
                     }
-                    else if (je.EventTypeID == JournalTypeEnum.ReceiveText)
+                    else if (je is JournalReceiveText && prev is JournalReceiveText)
                     {
                         var jdprev = prev as EliteDangerousCore.JournalEvents.JournalReceiveText;
                         var jd = je as EliteDangerousCore.JournalEvents.JournalReceiveText;
@@ -1261,7 +1261,7 @@ namespace EliteDangerousCore
                             return true;
                         }
                     }
-                    else if (je.EventTypeID == JournalTypeEnum.FSSAllBodiesFound)
+                    else if (je is JournalFSSAllBodiesFound && prev is JournalFSSAllBodiesFound)
                     {
                         var jdprev = prev as EliteDangerousCore.JournalEvents.JournalFSSAllBodiesFound;
                         var jd = je as EliteDangerousCore.JournalEvents.JournalFSSAllBodiesFound;

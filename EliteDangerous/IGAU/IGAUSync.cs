@@ -33,7 +33,7 @@ namespace EliteDangerousCore.IGAU
 
         public static bool NewEvent(Action<string> log, HistoryEntry he)
         {
-            if (he.EntryType == JournalTypeEnum.CodexEntry)
+            if (he.journalEntry is JournalCodexEntry)
             {
                 System.Diagnostics.Debug.WriteLine("Send to IGAU Codex entry " + he.EventTimeUTC.ToStringZulu());
                 logger = log;
